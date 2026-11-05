@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kaca Launcher</string>
+    <string name="lock_service_label">Kaca Launcher – Gestur</string>
+    <string name="lock_service_desc">Dipakai hanya untuk gestur launcher: kunci layar (ketuk dua kali), buka notifikasi, dan quick settings. Tidak membaca isi layar.</string>
+</resources>
