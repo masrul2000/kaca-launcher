@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         val state = launcherState
+        handleApplyIconPack(intent)
         setContent {
             val p = state.prefs
             val dark = when (p.themeMode) {
@@ -75,6 +76,24 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         // Tombol Home ditekan saat sudah di launcher -> kembali ke halaman utama
         if (intent.action == Intent.ACTION_MAIN) ui.goHome()
+        handleApplyIconPack(intent)
+    }
+
+    private fun handleApplyIconPack(intent: Intent?) {
+        if (intent?.action != ACTION_APPLY_ICON_PACK) return
+        val pkg = intent.getStringExtra("package") ?: return
+        val ok = IconPack.installed(this).any { it.packageName == pkg }
+        if (ok) {
+            launcherState.setIconPack(pkg)
+            Toast.makeText(this, "Icon pack diterapkan", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Icon pack tidak ditemukan", Toast.LENGTH_SHORT).show()
+        }
+        ui.goHome()
+    }
+
+    companion object {
+        const val ACTION_APPLY_ICON_PACK = "id.masrul.kaca.APPLY_ICON_PACK"
     }
 
     override fun onResume() {

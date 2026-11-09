@@ -94,6 +94,34 @@ class IconCache(private val context: Context, private val state: LauncherState) 
 
         val bmp = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
+
+        // Icon pack punya iconback/iconupon: ikon asli diperkecil di atas latar pack
+        val pack = state.iconPack
+        if (!fromPack && pack != null && pack.hasFallback) {
+            if (pack.backs.isNotEmpty()) {
+                val back = pack.backs[Math.floorMod(app.packageName.hashCode(), pack.backs.size)]
+                pack.getDrawable(back)?.let { it.setBounds(0, 0, px, px); it.draw(c) }
+            }
+            val inner = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
+            val ic = Canvas(inner)
+            val sz = (px * pack.scale).toInt()
+            val off = (px - sz) / 2
+            d.setBounds(off, off, off + sz, off + sz)
+            d.draw(ic)
+            pack.mask?.let { m ->
+                pack.getDrawable(m)?.let { md ->
+                    val mb = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
+                    md.setBounds(0, 0, px, px); md.draw(Canvas(mb))
+                    val paint = android.graphics.Paint().apply {
+                        xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.DST_OUT)
+                    }
+                    ic.drawBitmap(mb, 0f, 0f, paint)
+                }
+            }
+            c.drawBitmap(inner, 0f, 0f, null)
+            pack.upon?.let { u -> pack.getDrawable(u)?.let { it.setBounds(0, 0, px, px); it.draw(c) } }
+            return bmp
+        }
         val shape = state.prefs.iconShape
         if (fromPack || shape == IconShape.SYSTEM) {
             d.setBounds(0, 0, px, px)

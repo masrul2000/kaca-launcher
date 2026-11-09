@@ -24,7 +24,14 @@ class IconPack private constructor(
     private val byPackage: Map<String, String>,
     /** Semua nama drawable untuk picker ikon */
     val allDrawables: List<String>,
+    /** Untuk aplikasi tanpa ikon di pack: latar, lapisan atas, mask, skala */
+    val backs: List<String> = emptyList(),
+    val upon: String? = null,
+    val mask: String? = null,
+    val scale: Float = 1f,
 ) {
+    val hasFallback: Boolean get() = backs.isNotEmpty() || upon != null || mask != null
+
     fun drawableNameFor(pkg: String, cls: String): String? = map["$pkg/$cls"] ?: byPackage[pkg]
 
     @SuppressLint("DiscouragedApi")
@@ -56,10 +63,22 @@ class IconPack private constructor(
             val map = HashMap<String, String>()
             val byPkg = HashMap<String, String>()
             val all = LinkedHashSet<String>()
+            val backs = ArrayList<String>()
+            var upon: String? = null
+            var mask: String? = null
+            var scale = 1f
 
             openXml(res, pkg, "appfilter")?.let { p ->
                 var ev = p.eventType
                 while (ev != XmlPullParser.END_DOCUMENT) {
+                    if (ev == XmlPullParser.START_TAG) when (p.name) {
+                        "iconback" -> for (i in 0 until p.attributeCount) {
+                            if (p.getAttributeName(i).startsWith("img")) backs.add(p.getAttributeValue(i))
+                        }
+                        "iconupon" -> upon = p.getAttributeValue(null, "img1") ?: upon
+                        "iconmask" -> mask = p.getAttributeValue(null, "img1") ?: mask
+                        "scale" -> scale = p.getAttributeValue(null, "factor")?.toFloatOrNull() ?: scale
+                    }
                     if (ev == XmlPullParser.START_TAG && p.name == "item") {
                         val comp = p.getAttributeValue(null, "component")
                         val draw = p.getAttributeValue(null, "drawable")
@@ -87,7 +106,7 @@ class IconPack private constructor(
                 }
             }
             val drawables = (listed + all).distinct().sorted()
-            return IconPack(pkg, res, map, byPkg, drawables)
+            return IconPack(pkg, res, map, byPkg, drawables, backs, upon, mask, scale.coerceIn(0.2f, 1.5f))
         }
 
         @SuppressLint("DiscouragedApi")

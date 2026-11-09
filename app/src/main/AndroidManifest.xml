@@ -64,6 +64,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Dipanggil aplikasi icon pack (mis. Kaca Icons) untuk langsung menerapkan ikonnya -->
+            <intent-filter>
+                <action android:name="id.masrul.kaca.APPLY_ICON_PACK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <service

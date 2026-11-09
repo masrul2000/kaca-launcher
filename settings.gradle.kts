@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "KacaLauncher"
 include(":app")
+include(":iconpack")
